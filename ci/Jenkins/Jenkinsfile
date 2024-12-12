@@ -6,7 +6,7 @@ pipeline {
   stages {
     stage('Checkout') {
       steps {
-        git branch: 'main', url: 'https://github.com/deepakkr35/devops-demo-project.git'
+        git branch: 'main', url: 'https://github.com/AbuAbbasNaqvi/demo-java-app-ci.git'
       }
     }
     stage('Build and Test') {
@@ -14,16 +14,6 @@ pipeline {
         sh 'ls -ltr'
         // build the project and create a JAR file
         sh 'cd demo-java-app && mvn clean package'
-      }
-    }
-    stage('Static Code Analysis') {
-      environment {
-        SONAR_URL = "http://sonarqube:9000"
-      }
-      steps {
-        withCredentials([string(credentialsId: 'sonarqube', variable: 'SONAR_AUTH_TOKEN')]) {
-          sh 'cd demo-java-app && mvn sonar:sonar -Dsonar.login=$SONAR_AUTH_TOKEN -Dsonar.host.url=${SONAR_URL}'
-        }
       }
     }
     stage('Build and Push Docker Image') {
@@ -43,14 +33,14 @@ pipeline {
     }
     stage('Update Deployment File') {
         environment {
-            GIT_REPO_NAME = "devops-demo-project"
-            GIT_USER_NAME = "deepakkr35"
+            GIT_REPO_NAME = "demo-java-app-ci"
+            GIT_USER_NAME = "abuabbasnaqvi"
         }
         steps {
             withCredentials([string(credentialsId: 'github', variable: 'GITHUB_TOKEN')]) {
                 sh '''
-                    git config user.email "deepakkr35@gmail.com"
-                    git config user.name "Deepak Kumar"
+                    git config user.email "abuabbasali786@gmail.com"
+                    git config user.name "abu abbas naqvi"
                     sed -i "s/tag: .*/tag: \"${build_version}\"/" helm/app/values.yaml
                     git add helm/app/values.yaml
                     git commit -m "Update deployment image to version ${build_version}"
