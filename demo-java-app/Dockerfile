@@ -1,12 +1,14 @@
-# Base image 
-FROM openjdk
+# Use a specific version of OpenJDK
+FROM openjdk:17-jdk-slim
 
-# setting artifact path
+# Define the build-time argument for the artifact
 ARG artifact=target/demo-java-app.jar
 
+# Set the working directory
 WORKDIR /opt/app
 
+# Copy the application JAR to the working directory
 COPY ${artifact} app.jar
 
-# Entrypoint for running app
-ENTRYPOINT ["java","-jar","app.jar"]
+# Run the application
+ENTRYPOINT ["java", "-jar", "app.jar"]
