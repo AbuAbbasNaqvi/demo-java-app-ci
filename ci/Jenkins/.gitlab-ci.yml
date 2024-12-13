@@ -1,0 +1,48 @@
+stages:
+  - build
+  - test
+  - docker_build
+  - deploy
+
+variables:
+  DOCKER_IMAGE: "abbasnaqvi/demo-java-app"
+  DOCKER_TAG: "${CI_COMMIT_REF_NAME}-${CI_COMMIT_SHORT_SHA}" # Tag with branch name and commit hash
+
+build:
+  stage: build
+  script:
+    - echo "Building the Java project"
+    - cd demo-java-app && mvn clean package
+  artifacts:
+    paths:
+      - demo-java-app/target/
+
+test:
+  stage: test
+  script:
+    - echo "Running tests"
+    - cd demo-java-app && mvn test
+
+docker_build:
+  stage: docker_build
+  image: docker:latest
+  services:
+    - docker:dind
+  before_script:
+    - echo "$CI_REGISTRY_PASSWORD" | docker login -u "$CI_REGISTRY_USER" --password-stdin $CI_REGISTRY
+  script:
+    - echo "Building Docker image"
+    - docker build -t $DOCKER_IMAGE:$DOCKER_TAG demo-java-app
+    - echo "Pushing Docker image to registry"
+    - docker push $DOCKER_IMAGE:$DOCKER_TAG
+
+deploy:
+  stage: deploy
+  script:
+    - echo "Updating deployment file"
+    - sed -i "s/tag:.*/tag: \"$DOCKER_TAG\"/" helm/app/values.yaml
+    - git config user.email "abuabbasali786@gmail.com"
+    - git config user.name "Abu Abbas Naqvi"
+    - git add helm/app/values.yaml
+    - git commit -m "Update Docker image tag to $DOCKER_TAG"
+    - git push origin HEAD
