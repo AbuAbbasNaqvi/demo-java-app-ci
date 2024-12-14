@@ -9,6 +9,12 @@ pipeline {
         git branch: 'main', url: 'https://github.com/AbuAbbasNaqvi/demo-java-app-ci.git'
       }
     }
+    stage('Static Code Analysis') {
+      steps {
+        // Add your static code analysis tool here (e.g., SonarQube, Checkstyle, etc.)
+        echo 'Static Code Analysis will run here.'
+      }
+    }
     stage('Build and Test') {
       steps {
         sh 'ls -ltr'
